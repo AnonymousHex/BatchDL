@@ -4,12 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Principal;
-using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using BatchDL.Exceptions;
-using BatchDL.Extensions;
 using BatchDL.Options;
 using BatchDL.UI;
 using MessageBox = System.Windows.MessageBox;
@@ -45,7 +42,7 @@ namespace BatchDL
 		public MainWindowContext()
 		{
 			_eHentaiOptionsContext.Folder = @"C:\Projects\test";
-			_eHentaiOptionsContext.Url = @"https://e-hentai.org/s/dfd9b9243c/723937-29";
+			_eHentaiOptionsContext.Url = @"https://e-hentai.org/s/dfd9b9243c/723937-29"; //todo remove
 
 			_downloaders = new Dictionary<Website, DocumentDownloadHandler>
 			{
@@ -209,9 +206,7 @@ namespace BatchDL
 		/// <param name="options"></param>
 		private void EHentaiBrowserOnDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs args, Website site, WebsiteOptions options)
 		{
-			//id "i7" has an <a> in it with link to dl original, if that exists, try to dl orig, otherwise get regular image
-			//appears that login is needed, but cookies aren't.  might be an IP thing
-
+			//TODO make a list of all the pages that have HQ images, grab links, window.open them and replace as necessary
 			var browser = (WebBrowser)sender;
 			if (browser.Document?.Body == null)
 				return;
@@ -221,142 +216,56 @@ namespace BatchDL
 			//create subfolder for thread
 			Directory.CreateDirectory(Path.Combine(options.Folder, title));
 
-			var fullSizeLink = browser.Document.GetElementById("i7");
-			if (fullSizeLink != null)
-			{
-				var start = fullSizeLink.OuterHtml.IndexOf("href=", StringComparison.Ordinal) + 6;
-				var end = fullSizeLink.OuterHtml.IndexOf(">", start, StringComparison.Ordinal) - 1;
-				var url = fullSizeLink.OuterHtml.Substring(start, end - start);
-	
-				////string[] cookies = new string[2];
-				try
-				{
-				//	var request = Utilities.GetEHentaiRequest(options.Url, "");
-
-				//	using (var response = (HttpWebResponse)request.GetResponse())
-				//	using (var stream = response.GetResponseStream())
-				//	{
-				//		if (stream != null)
-				//		{
-				//			//cookies = response.Headers.Get("Set-Cookie").Split(';')[0].Split('=');
-				//			//Debug.WriteLine(cookies);
-				//			using (var buffer = new BufferedStream(stream))
-				//			using (var reader = new StreamReader(buffer))
-				//			{
-				//				while (reader.EndOfStream == false)
-				//				{
-				//					var line = reader.ReadLine();
-				//					if (line != null)
-				//						Debug.WriteLine(line);
-				//				}
-				//			}
-				//		}
-				//	}
-
-					start = url.IndexOf("gid=", StringComparison.Ordinal) + 4;
-					var gid = url.Substring(start, url.IndexOf("&", start, StringComparison.Ordinal) - start);
-					var key = url.Substring(url.IndexOf("key=", StringComparison.Ordinal) + 4);
-					var loginUrl = string.Format("https://e-hentai.org/bounce_login.php?b=ds&bt=7-{0}-1-{1}", gid, key);
-
-					var browser1 = new WebBrowser
-					{
-						ScriptErrorsSuppressed = true,
-					};
-
-					browser1.Navigate(new Uri(loginUrl));
-					WebBrowserDocumentCompletedEventHandler handler = null;
-					handler = (s, a) =>
-					{
-						EHentaiLoginOnDocumentCompleted(s as WebBrowser, options, title);
-						browser1.DocumentCompleted -= handler;
-					};
-
-					browser1.DocumentCompleted += handler;
-				}
-				catch (Exception ex)
-				{
-					Debug.WriteLine(ex);
-				}
-			}
-			else
-			{
-				
-			}
-
 			CanDownload = true;
 
-			//int fails = 0;
-			//int image = 1;
-			//while (true)
-			//{
-			//	try
-			//	{
-			//		var fileName = image + ".jpg";
-			//		//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
-			//		//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
-			//		image++;
-			//	}
-			//	catch (WebException)
-			//	{
-			//		try
-			//		{
-			//			var fileName = image + ".png";
-			//			//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
-			//			//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
-			//			image++;
-			//		}
-			//		catch (WebException ex)
-			//		{
-			//			Debug.WriteLine(ex);
-
-			//			fails++;
-			//			if (fails == 3)
-			//			{
-			//				browser.Dispose();
-
-			//				CanDownload = true;
-			//				return;
-			//			}
-			//		}
-			//	}
-			//}
-		}
-
-		private void EHentaiLoginOnDocumentCompleted(WebBrowser browser, WebsiteOptions options, string title)
-		{
-			if (browser.Document == null)
-				return;
-
-			bool hasEnteredName = false;
-			foreach (var tag in browser.Document.GetElementsByTagName("input").OfType<HtmlElement>())
+			int fails = 0;
+			int image = 1;
+			while (true)
 			{
-				HtmlElementCollection children;
-				if (hasEnteredName == false)
+				try
 				{
-					children = tag.Children.GetElementsByName("UserName");
-					if (children.Count == 0)
-						continue;
+					//todo get each page, onload save image, if there's a big link, cache url
 
-					children[0].SetAttribute("value", "killmeplease11");
-					hasEnteredName = true;
-					continue;
+					var fullSizeLink = browser.Document.GetElementById("i7");
+					if (fullSizeLink != null)
+					{
+						var start = fullSizeLink.OuterHtml.IndexOf("href=", StringComparison.Ordinal) + 6;
+						var end = fullSizeLink.OuterHtml.IndexOf(">", start, StringComparison.Ordinal) - 1;
+						var url = fullSizeLink.OuterHtml.Substring(start, end - start);
+					}
+					else
+					{
+
+					}
+
+					var fileName = image + ".jpg";
+					//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
+					//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
+					image++;
 				}
+				catch (WebException)
+				{
+					try
+					{
+						var fileName = image + ".png";
+						//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
+						//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
+						image++;
+					}
+					catch (WebException ex)
+					{
+						Debug.WriteLine(ex);
 
-				children = tag.Children.GetElementsByName("PassWord");
-				if (children.Count == 0)
-					continue;
+						fails++;
+						if (fails == 3)
+						{
+							browser.Dispose();
 
-				children[0].SetAttribute("value", "1234567890");
-			}
-
-			foreach (var children in browser.Document.
-				GetElementsByTagName("form")
-				.OfType<HtmlElement>()
-				.Select(tag => tag.Children.GetElementsByName("ipb_login_form"))
-				.Where(children => children.Count != 0))
-			{
-				children[0].RaiseEvent("submit");
-				break;
+							CanDownload = true;
+							return;
+						}
+					}
+				}
 			}
 		}
 
