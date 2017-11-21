@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Net;
 using BatchDL.Exceptions;
 
 namespace BatchDL
@@ -21,6 +22,9 @@ namespace BatchDL
 
 			if (url.Contains("4chan"))
 				return Website.FourChan;
+
+			if (url.Contains("e-hentai"))
+				return Website.EHentai;
 
 			throw new InvalidUrlException(url, "Unknown website.");
 		}
@@ -47,9 +51,25 @@ namespace BatchDL
 			return title.Split('-')[1].Trim().RemoveIllegalChars();
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="title"></param>
+		/// <returns></returns>
 		public static string GetFormattedNHentaiTitle(string title)
 		{
 			return title.Split('»')[0].Trim().RemoveIllegalChars();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="title"></param>
+		/// <returns></returns>
+		public static string GetFormattedEHentaiTitle(string title)
+		{
+			return title;
+			//return title.Substring(title.LastIndexOf('-')).Trim().RemoveIllegalChars();
 		}
 
 		/// <summary>
@@ -67,6 +87,18 @@ namespace BatchDL
 			}
 
 			return input;
+		}
+
+		public static HttpWebRequest GetEHentaiRequest(string url, string referer)
+		{
+			var request = (HttpWebRequest)WebRequest.Create(url);
+			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:43.0) Gecko/20100101 Firefox/43.0.4 Waterfox/43.0.4";
+			request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+			request.Referer = referer;
+			request.Host = "e-hentai.org";
+			//request.AutomaticDecompression = DecompressionMethods.GZip;
+			//request.Proxy = null;
+			return request;
 		}
 	}
 }

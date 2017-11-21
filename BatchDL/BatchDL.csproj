@@ -46,6 +46,7 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -56,6 +57,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Exceptions\InvalidUrlException.cs" />
+    <Compile Include="Extensions\Enumerable.cs" />
+    <Compile Include="Options\EHentaiOptions.xaml.cs">
+      <DependentUpon>EHentaiOptions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Options\EHentaiOptionsContext.cs" />
     <Compile Include="Options\FourChanOptionsContext.cs" />
     <Compile Include="Options\NHentaiOptionsContext.cs" />
     <Compile Include="Options\WebsiteOptions.cs" />
@@ -63,6 +69,10 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Website.cs" />
     <Page Include="Dimensions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Options\EHentaiOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

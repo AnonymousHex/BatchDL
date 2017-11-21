@@ -3,6 +3,7 @@
 	internal enum Website
 	{
 		NHentai,
-		FourChan
+		FourChan,
+		EHentai
 	}
 }

@@ -18,19 +18,25 @@
 	</Window.Resources>
 	<StackPanel>
 		<TabControl SelectedIndex="{Binding SelectedTab}">
-			<TabItem Header="4chan">
+			<TabItem Header="{x:Static properties:Resources.FourChan}">
 				<StackPanel IsEnabled="{Binding CanDownload}">
 					<options:FourChanOptions DataContext="{Binding FourChanOptions}"/>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="nhentai">
+			<TabItem Header="{x:Static properties:Resources.NHentai}">
 				<StackPanel IsEnabled="{Binding CanDownload}">
 					<options:NHentaiOptions DataContext="{Binding NHentaiOptions}"/>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="{x:Static properties:Resources.EHentai}">
+				<StackPanel IsEnabled="{Binding CanDownload}">
+					<options:EHentaiOptions DataContext="{Binding EHentaiOptions}"/>
+				</StackPanel>
+			</TabItem>
 		</TabControl>
-		<Button Content="Download"
+		<Button Content="{x:Static properties:Resources.Download}"
 			    Margin="0,8,0,8"
+				IsDefault="True"
 				IsEnabled="{Binding CanDownload}"
 			    Command="{Binding DownloadCommand}"
 			    Style="{StaticResource ButtonStyle}">

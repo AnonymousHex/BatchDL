@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="BatchDL.Options.FourChanOptions"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:properties="clr-namespace:BatchDL.Properties">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -11,14 +12,14 @@
 	<StackPanel Margin="8">
 		<StackPanel Orientation="Horizontal"
 			            Margin="0,0,0,4">
-				<TextBlock Text="Url:"
+			<TextBlock Text="{x:Static properties:Resources.UrlLabel}"
 				           ToolTip="4chan thread url."
 				           Style="{StaticResource LabelStyle}"/>
 				<TextBox Text="{Binding Url}"
 				         MinWidth="275"/>
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Folder:"
+			<TextBlock Text="{x:Static properties:Resources.FolderLabel}"
 				           ToolTip="Base directory for image folders.  If left blank, the working directory is used."
 				           Style="{StaticResource LabelStyle}"/>
 				<TextBox Text="{Binding Folder, Mode=TwoWay}"

@@ -61,11 +61,65 @@ namespace BatchDL.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download.
+        /// </summary>
+        public static string Download {
+            get {
+                return ResourceManager.GetString("Download", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EHentai.
+        /// </summary>
+        public static string EHentai {
+            get {
+                return ResourceManager.GetString("EHentai", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folder:.
+        /// </summary>
+        public static string FolderLabel {
+            get {
+                return ResourceManager.GetString("FolderLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 4chan.
+        /// </summary>
+        public static string FourChan {
+            get {
+                return ResourceManager.GetString("FourChan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NHentai.
+        /// </summary>
+        public static string NHentai {
+            get {
+                return ResourceManager.GetString("NHentai", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BatchDL - Batch Download Utility.
         /// </summary>
         public static string Title {
             get {
                 return ResourceManager.GetString("Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Url:.
+        /// </summary>
+        public static string UrlLabel {
+            get {
+                return ResourceManager.GetString("UrlLabel", resourceCulture);
             }
         }
     }
