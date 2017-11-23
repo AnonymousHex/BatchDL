@@ -207,6 +207,7 @@ namespace BatchDL
 				return;
 
 			var title = _formatters[site].Invoke(browser.DocumentTitle);
+			Debug.WriteLine(title);
 			var folder = Path.Combine(options.Folder, title);
 			Directory.CreateDirectory(folder);
 

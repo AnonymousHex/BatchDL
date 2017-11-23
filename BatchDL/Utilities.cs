@@ -68,7 +68,7 @@ namespace BatchDL
 		/// <returns></returns>
 		public static string GetFormattedEHentaiTitle(string title)
 		{
-			return title;
+			return title.RemoveIllegalChars();
 		}
 
 		/// <summary>
