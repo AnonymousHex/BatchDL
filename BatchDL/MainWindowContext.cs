@@ -41,9 +41,6 @@ namespace BatchDL
 
 		public MainWindowContext()
 		{
-			_eHentaiOptionsContext.Folder = @"C:\Projects\test";
-			_eHentaiOptionsContext.Url = @"https://e-hentai.org/s/dfd9b9243c/723937-29"; //todo remove
-
 			_downloaders = new Dictionary<Website, DocumentDownloadHandler>
 			{
 				{Website.FourChan, FourChanBrowserOnDocumentCompleted},
@@ -57,8 +54,6 @@ namespace BatchDL
 				new KeyValuePair<Website, WebsiteOptions>(Website.NHentai, _nHentaiOptionsContext),
 				new KeyValuePair<Website, WebsiteOptions>(Website.EHentai, _eHentaiOptionsContext),
 			};
-
-			SelectedTab = 2; //todo remove
 		}
 
 		public EHentaiOptionsContext EHentaiOptions
@@ -114,14 +109,15 @@ namespace BatchDL
 				var browser = new WebBrowser
 				{
 					ScriptErrorsSuppressed = true,
+					AllowNavigation = true
 				};
 
 				browser.Navigate(new Uri(downloader.Url));
 				WebBrowserDocumentCompletedEventHandler handler = null;
 				handler = (sender, args) =>
 				{
-					_downloaders[site].Invoke(sender, args, site, downloader);
 					browser.DocumentCompleted -= handler;
+					_downloaders[site].Invoke(sender, args, site, downloader);
 				};
 
 				browser.DocumentCompleted += handler;
@@ -206,66 +202,90 @@ namespace BatchDL
 		/// <param name="options"></param>
 		private void EHentaiBrowserOnDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs args, Website site, WebsiteOptions options)
 		{
-			//TODO make a list of all the pages that have HQ images, grab links, window.open them and replace as necessary
 			var browser = (WebBrowser)sender;
 			if (browser.Document?.Body == null)
 				return;
 
 			var title = _formatters[site].Invoke(browser.DocumentTitle);
+			var folder = Path.Combine(options.Folder, title);
+			Directory.CreateDirectory(folder);
 
-			//create subfolder for thread
-			Directory.CreateDirectory(Path.Combine(options.Folder, title));
+			var links = browser.Document.GetElementsByTagName("a")
+				.OfType<HtmlElement>()
+				.Where(e =>
+				{
+					var href = e.GetAttribute("href");
+					if (string.IsNullOrEmpty(href) || href.Length <= 2)
+						return false;
 
-			CanDownload = true;
+					return 
+					(href[href.Length - 2] == '-' ||
+					href[href.Length - 3] == '-' || 
+					href[href.Length - 4] == '-') 
+					&& href.StartsWith("https://e-hentai.org/s/");
+				})
+				.Select(e => e.GetAttribute("href"))
+				.ToList();
 
-			int fails = 0;
-			int image = 1;
-			while (true)
+			foreach (var link in links)
 			{
-				try
+				var browser1 = new WebBrowser
 				{
-					//todo get each page, onload save image, if there's a big link, cache url
+					ScriptErrorsSuppressed = true,
+					AllowNavigation = true
+				};
 
-					var fullSizeLink = browser.Document.GetElementById("i7");
-					if (fullSizeLink != null)
-					{
-						var start = fullSizeLink.OuterHtml.IndexOf("href=", StringComparison.Ordinal) + 6;
-						var end = fullSizeLink.OuterHtml.IndexOf(">", start, StringComparison.Ordinal) - 1;
-						var url = fullSizeLink.OuterHtml.Substring(start, end - start);
-					}
-					else
-					{
-
-					}
-
-					var fileName = image + ".jpg";
-					//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
-					//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
-					image++;
-				}
-				catch (WebException)
+				WebBrowserDocumentCompletedEventHandler handler = null;
+				var link1 = link;
+				handler = (s, a) =>
 				{
-					try
-					{
-						var fileName = image + ".png";
-						//var url = string.Format("https://i.nhentai.net/galleries/{0}/{1}", id, fileName);
-						//Client.DownloadFile(url, Path.Combine(options.Folder, title, fileName));
-						image++;
-					}
-					catch (WebException ex)
-					{
-						Debug.WriteLine(ex);
+					browser1.DocumentCompleted -= handler;
+					ProcessEHentaiPage(s, folder, link1.Substring(link1.LastIndexOf('-') + 1), links.Count);
+				};
 
-						fails++;
-						if (fails == 3)
-						{
-							browser.Dispose();
+				browser1.DocumentCompleted += handler;
+				browser1.Url = new Uri(link);
+			}
+		}
 
-							CanDownload = true;
-							return;
-						}
-					}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="folder"></param>
+		/// <param name="fileName"></param>
+		/// <param name="count"></param>
+		private void ProcessEHentaiPage(object sender, string folder, string fileName, int count)
+		{
+			var browser = (WebBrowser)sender;
+			if (browser.Document?.Body == null)
+				return;
+
+			try
+			{
+				var fullSizeLink = browser.Document.GetElementById("i7");
+				if (fullSizeLink != null)
+				{
+					var start = fullSizeLink.OuterHtml.IndexOf("href=", StringComparison.Ordinal) + 6;
+					var end = fullSizeLink.OuterHtml.IndexOf(">", start, StringComparison.Ordinal) - 1;
+					var url = fullSizeLink.OuterHtml.Substring(start, end - start);
 				}
+
+				var img = browser.Document.GetElementById("img")?.GetAttribute("src");
+				if (img == null)
+					return;
+
+				var client = new WebClient();
+				client.DownloadFile(img, Path.Combine(folder, fileName + Path.GetExtension(img)));
+
+				int result;
+				if (int.TryParse(fileName, out result) && result == count)
+					CanDownload = true;
+			}
+			catch (WebException ex)
+			{
+				Debug.WriteLine(ex);
+				browser.Dispose();
 			}
 		}
 
