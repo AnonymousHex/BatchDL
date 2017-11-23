@@ -15,14 +15,14 @@
 			<TextBlock Text="{x:Static properties:Resources.UrlLabel}"
 				    VerticalAlignment="Center"
 				    Style="{StaticResource LabelStyle}"/>
-			<TextBox Text="{Binding Url}"
+			<TextBox Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}"
 					 MinWidth="275"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Text="{x:Static properties:Resources.FolderLabel}"
 				           ToolTip="Base directory for image folders.  If left blank, the working directory is used."
 				           Style="{StaticResource LabelStyle}"/>
-			<TextBox Text="{Binding Folder, Mode=TwoWay}"
+			<TextBox Text="{Binding Folder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 				         MinWidth="275"/>
 		</StackPanel>
 	</StackPanel>
